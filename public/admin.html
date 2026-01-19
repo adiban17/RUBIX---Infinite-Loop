@@ -2,41 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>ProctorHQ | Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .dashboard-container { width: 90%; margin: 20px auto; font-family: sans-serif; }
-        h1 { text-align: center; color: #2c3e50; }
-        #status-msg { text-align: center; font-style: italic; color: #666; }
-        
-        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #2c3e50; color: white; }
-        tr:hover { background-color: #f5f5f5; }
-        
-        /* The specific style for cheaters */
-        .violation { background-color: #ffcccc !important; color: #a00000; font-weight: bold; }
-    </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <h1>Live Proctor Dashboard</h1>
-        <p id="status-msg">Connecting to server...</p>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Student Name</th>
-                    <th>Roll No</th>
-                    <th>SAP ID</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Risk Score / Status</th>
-                </tr>
-            </thead>
-            <tbody id="student-table">
-                </tbody>
-        </table>
+        <header>
+            <div>
+                <h1>ProctorHQ Monitor</h1>
+                <p class="subtitle">Real-time exam surveillance system</p>
+            </div>
+            <div class="status-indicator">
+                <div class="dot"></div>
+                <span id="connection-status">Live Server</span>
+            </div>
+        </header>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="20%">Student Name</th>
+                        <th width="15%">Roll No</th>
+                        <th width="15%">SAP ID</th>
+                        <th width="15%">Start Time</th>
+                        <th width="15%">End Time</th>
+                        <th width="20%">Live Status</th>
+                    </tr>
+                </thead>
+                <tbody id="student-table">
+                    </tbody>
+            </table>
+        </div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -44,41 +42,47 @@
     <script>
         const socket = io();
         const tableBody = document.getElementById('student-table');
-        const statusMsg = document.getElementById('status-msg');
+        const connectionStatus = document.getElementById('connection-status');
 
-        // 1. connection Confirmation
         socket.on('connect', () => {
-            statusMsg.innerText = "Connected to Server. Waiting for students...";
-            statusMsg.style.color = "green";
+            connectionStatus.innerText = "System Online";
+            connectionStatus.style.color = "#166534";
         });
 
-        // 2. Handle Data Updates
         socket.on('update-dashboard', (students) => {
             tableBody.innerHTML = ''; 
             
-            // Handle empty state
             if (students.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #777;">No active students connected.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px; color: #94a3b8;">Waiting for candidates to join...</td></tr>';
                 return;
             }
 
-            // Loop through students
             students.forEach(student => {
-                let rowClass = "";
-                
-                // Color code the row based on risk (Your Logic)
+                // Determine Badge Style
+                let badgeClass = "badge-normal";
+                let statusText = student.riskScore || "Normal";
+
                 if (student.riskScore && student.riskScore.includes("VIOLATION")) {
-                    rowClass = "violation";
+                    badgeClass = "badge-violation";
+                } else if (student.riskScore === "Offline") {
+                    badgeClass = "badge-neutral"; // You can add a gray style for this if you want
+                    statusText = "Disconnected";
                 }
 
-                const row = `<tr class="${rowClass}">
-                    <td>${student.name}</td>
-                    <td>${student.roll}</td>
-                    <td>${student.sap}</td>
+                const row = `
+                <tr>
+                    <td style="font-weight: 500; color: #0f172a;">${student.name}</td>
+                    <td style="font-family: monospace;">${student.roll}</td>
+                    <td style="font-family: monospace;">${student.sap}</td>
                     <td>${student.startTime}</td>
                     <td>${student.endTime}</td>
-                    <td>${student.riskScore}</td>
+                    <td>
+                        <span class="badge ${badgeClass}">
+                            ${statusText}
+                        </span>
+                    </td>
                 </tr>`;
+                
                 tableBody.innerHTML += row;
             });
         });

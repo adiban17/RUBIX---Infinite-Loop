@@ -1,28 +1,114 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-import socketio  # The new communication library
+import socketio
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+# --- GLOBAL VARIABLES ---
+# These will hold the user's details after login
+USER_DETAILS = {
+    "name": "",
+    "roll": "",
+    "sap": ""
+}
+
+# --- GUI LOGIN CLASS ---
+class LoginApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("ProctorHQ | Student Login")
+        self.root.geometry("400x350")
+        self.root.configure(bg="#f8f9fa")
+        
+        # Center the window
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        x = (screen_width/2) - (400/2)
+        y = (screen_height/2) - (350/2)
+        root.geometry('%dx%d+%d+%d' % (400, 350, x, y))
+
+        # Styles
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure('TLabel', background="#f8f9fa", font=('Helvetica', 10))
+        style.configure('TButton', font=('Helvetica', 10, 'bold'))
+
+        # Header
+        header_frame = tk.Frame(root, bg="#f8f9fa")
+        header_frame.pack(pady=20)
+        tk.Label(header_frame, text="Exam Portal", font=("Helvetica", 18, "bold"), bg="#f8f9fa", fg="#2c3e50").pack()
+        tk.Label(header_frame, text="Enter your details to begin", font=("Helvetica", 10), bg="#f8f9fa", fg="#7f8c8d").pack()
+
+        # Input Frame
+        input_frame = tk.Frame(root, bg="#f8f9fa", padx=40)
+        input_frame.pack(fill="both", expand=True)
+
+        # Name
+        ttk.Label(input_frame, text="Full Name:").pack(anchor="w", pady=(10,0))
+        self.name_entry = ttk.Entry(input_frame, width=40)
+        self.name_entry.pack(pady=5)
+
+        # Roll No
+        ttk.Label(input_frame, text="Roll Number:").pack(anchor="w", pady=(10,0))
+        self.roll_entry = ttk.Entry(input_frame, width=40)
+        self.roll_entry.pack(pady=5)
+
+        # SAP ID
+        ttk.Label(input_frame, text="SAP ID:").pack(anchor="w", pady=(10,0))
+        self.sap_entry = ttk.Entry(input_frame, width=40)
+        self.sap_entry.pack(pady=5)
+
+        # Button
+        self.login_btn = tk.Button(root, text="Start Exam", bg="#6366f1", fg="white", 
+                                   font=("Helvetica", 11, "bold"), relief="flat", 
+                                   padx=20, pady=8, cursor="hand2", command=self.submit)
+        self.login_btn.pack(pady=20)
+
+    def submit(self):
+        name = self.name_entry.get().strip()
+        roll = self.roll_entry.get().strip()
+        sap = self.sap_entry.get().strip()
+
+        if not name or not roll or not sap:
+            messagebox.showerror("Error", "All fields are required!")
+            return
+        
+        # Save details
+        USER_DETAILS["name"] = name
+        USER_DETAILS["roll"] = roll
+        USER_DETAILS["sap"] = sap
+        
+        # Close Window
+        self.root.destroy()
+
+# --- RUN LOGIN SCREEN ---
+root = tk.Tk()
+app = LoginApp(root)
+root.mainloop()
+
+# If window closed without logging in (X button), stop script
+if not USER_DETAILS["name"]:
+    print("Login cancelled.")
+    exit()
+
+# ==========================================
+#      BELOW IS THE EXISTING VISION LOGIC
+# ==========================================
 
 # --- NETWORK SETUP ---
 sio = socketio.Client()
-print("Connecting to server...")
+print(f"\nLogging in as {USER_DETAILS['name']}...")
 
 try:
     sio.connect('http://localhost:3000')
     print("Connected to Proctor Server!")
+    # Register student using the GUI data
+    sio.emit('student-connect', USER_DETAILS)
 except Exception as e:
     print(f"Connection Failed: {e}")
     print("Ensure server.js is running first!")
     exit()
-
-# --- STUDENT LOGIN ---
-print("\n--- EXAM PORTAL ---")
-student_name = input("Enter Name: ")
-student_roll = input("Enter Roll No: ")
-student_sap = input("Enter SAP ID: ")
-
-# Register student with server
-sio.emit('student-connect', {'name': student_name, 'roll': student_roll, 'sap': student_sap})
 
 # --- INITIALIZATION ---
 mp_face_mesh = mp.solutions.face_mesh
@@ -47,7 +133,7 @@ smooth_pitch = 0
 smooth_yaw = 0
 smooth_roll = 0
 
-# Track previous status to avoid spamming the server
+# Track previous status
 last_sent_status = ""
 
 def get_head_pose(image, face_landmarks):
@@ -73,7 +159,7 @@ def get_head_pose(image, face_landmarks):
     success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
     rmat, jac = cv2.Rodrigues(rot_vec)
     angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
-    return angles[0], angles[1], angles[2] # Pitch, Yaw, Roll
+    return angles[0], angles[1], angles[2]
 
 while cap.isOpened():
     success, image = cap.read()
@@ -104,7 +190,6 @@ while cap.isOpened():
     if not is_calibrated:
         cv2.putText(image, "Look at screen & Press 'C'", (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
-    # --- VIOLATION LOGIC ---
     if face_count == 0:
         status_text = "VIOLATION: NO FACE"
         color = (0, 0, 255)
@@ -134,9 +219,6 @@ while cap.isOpened():
 
     if is_calibrated:
         cv2.putText(image, status_text, (20, 230), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-        
-        # --- SEND TO SERVER ---
-        # Only emit if status changed to prevent lag
         if status_text != last_sent_status:
             sio.emit('student-status-update', status_text)
             last_sent_status = status_text
@@ -144,7 +226,7 @@ while cap.isOpened():
     cv2.imshow('Proctoring Vision Core', image)
 
     key = cv2.waitKey(5) & 0xFF
-    if key == 27: # ESC
+    if key == 27:
         break
     elif key == ord('c'):
         pitch_offset = smooth_pitch

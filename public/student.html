@@ -2,23 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Exam Portal</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; }
-        .box { background: white; padding: 40px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; }
-        code { background: #eee; padding: 5px; border-radius: 4px; }
-    </style>
+    <title>Exam Security Check</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="box">
-        <h1>⚠️ Do Not Use This Browser for the Exam</h1>
-        <p>You must run the secure Python app to take the exam.</p>
-        <hr>
-        <p><strong>Instructions:</strong></p>
-        <p>1. Open your terminal.</p>
-        <p>2. Run: <code>python proctor_app.py</code></p>
-        <p>3. Enter your details in the terminal.</p>
+    <div class="lobby-box">
+        <div class="lobby-icon">🛡️</div>
+        <h2 style="margin-bottom: 10px;">Secure Exam Environment</h2>
+        <p style="color: #64748b; margin-bottom: 25px;">
+            This exam is monitored by ProctorHQ AI. Browsers are not supported for security reasons.
+        </p>
+
+        <div style="text-align: left; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <p style="font-weight: 600; margin-bottom: 10px; font-size: 0.9rem;">To Begin:</p>
+            <ol style="margin-left: 20px; font-size: 0.9rem; color: #475569; line-height: 1.8;">
+                <li>Close all unnecessary applications.</li>
+                <li>Open your terminal / command prompt.</li>
+                <li>Run the security client:</li>
+            </ol>
+            <span class="code-block">python proctor_app.py</span>
+        </div>
+
+        <p style="margin-top: 25px; font-size: 0.8rem; color: #94a3b8;">
+            Your status will automatically update on the proctor's dashboard once connected.
+        </p>
     </div>
 </body>
 </html>
