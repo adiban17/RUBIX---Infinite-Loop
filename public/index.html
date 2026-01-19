@@ -2,78 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ProctorHQ | Secure Login</title>
+    <title>ProctorHQ | AI Exam Security</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .login-wrapper {
-            display: flex; min-height: 100vh; 
-            align-items: center; justify-content: center;
-            position: relative; z-index: 10;
-        }
-        .login-card {
-            width: 100%; max-width: 420px; padding: 48px;
-            text-align: center;
-        }
-        .logo-glow {
-            width: 60px; height: 60px; margin: 0 auto 20px;
-            background: linear-gradient(135deg, var(--primary), #a855f7);
-            border-radius: 16px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; color: white;
-            box-shadow: 0 0 30px var(--primary-glow);
-        }
-    </style>
 </head>
 <body>
     <div class="bg-fixed-layer"></div>
     <div class="grid-overlay"></div>
 
-    <div class="login-wrapper">
-        <div class="glass-panel login-card">
-            <div style="margin-bottom: 35px;">
-                <div class="logo-glow">🛡️</div>
-                <h1 style="font-size: 2rem; margin-bottom: 8px;">ProctorHQ</h1>
-                <p class="subtitle">Secure Examination Gateway</p>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span style="font-size: 1.8rem;">🛡️</span> ProctorHQ
+        </div>
+        <a href="/login.html" class="btn-primary" style="width: auto; padding: 10px 24px; box-shadow: none;">
+            Admin Login
+        </a>
+    </nav>
+
+    <div class="container">
+        <header class="hero-section">
+            <div class="badge badge-neutral" style="margin-bottom: 20px; padding: 8px 16px;">
+                <div class="dot" style="background: #34d399; box-shadow: 0 0 10px #34d399;"></div> 
+                v2.0 Now Live
+            </div>
+            
+            <h1 class="hero-title">The Future of <br><span style="color: var(--primary);">Secure Testing</span></h1>
+            
+            <p class="hero-desc">
+                AI-powered surveillance, automated threat detection, and real-time integrity forensics. 
+                Ensure 100% exam validity with the world's most advanced proctoring engine.
+            </p>
+            
+            <div style="display: flex; gap: 15px;">
+                <a href="/student.html" class="btn-primary" style="width: auto; padding: 14px 32px;">
+                    Start Student Exam
+                </a>
+                <a href="#features" class="btn-secondary" style="width: auto; padding: 14px 32px;">
+                    Learn More
+                </a>
+            </div>
+        </header>
+
+        <div id="features" style="padding: 60px 0;">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <h2 style="font-size: 2rem; font-weight: 700;">Military-Grade Integrity</h2>
+                <p class="subtitle">Powered by Neural Networks</p>
             </div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="input-group">
-                    <label class="input-label">Admin ID</label>
-                    <input type="text" id="adminId" class="input-field" placeholder="Enter ID" required>
-                </div>
-                
-                <div class="input-group">
-                    <label class="input-label">Password</label>
-                    <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+            <div class="feature-grid">
+                <div class="landing-card">
+                    <div class="lc-icon"><ion-icon name="eye-outline"></ion-icon></div>
+                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">Gaze Tracking</h3>
+                    <p style="color: var(--text-muted); line-height: 1.5;">
+                        Advanced computer vision algorithms track candidate eye movement to detect off-screen referencing.
+                    </p>
                 </div>
 
-                <button type="submit" class="btn-primary" style="margin-top: 10px;">Authenticate System</button>
-            </form>
+                <div class="landing-card">
+                    <div class="lc-icon"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">Object Detection</h3>
+                    <p style="color: var(--text-muted); line-height: 1.5;">
+                        Real-time identification of unauthorized objects like mobile phones, books, or additional people.
+                    </p>
+                </div>
 
-            <div style="margin: 30px 0; border-top: 1px solid var(--glass-border); position: relative;">
-                <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #151e32; padding: 0 10px; color: var(--text-muted); font-size: 0.75rem; border-radius: 4px;">OR</span>
-            </div>
-
-            <div>
-                <a href="/student.html" class="btn-secondary">Launch Student Portal</a>
+                <div class="landing-card">
+                    <div class="lc-icon"><ion-icon name="lock-closed-outline"></ion-icon></div>
+                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">Browser Lockdown</h3>
+                    <p style="color: var(--text-muted); line-height: 1.5;">
+                        Prevents tab switching, copy-paste functionality, and background application usage during exams.
+                    </p>
+                </div>
             </div>
         </div>
+        
+        <footer style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--glass-border);">
+            &copy; 2026 ProctorHQ Inc. All rights reserved.
+        </footer>
     </div>
-
-    <script>
-        function handleLogin(e) {
-            e.preventDefault();
-            const id = document.getElementById('adminId').value;
-            const pass = document.getElementById('password').value;
-
-            if (id === "admin" && pass === "password123") {
-                localStorage.setItem("proctor_auth_token", "valid_session_key");
-                window.location.href = "/admin.html";
-            } else {
-                alert("⛔ Access Denied: Invalid Credentials");
-                document.getElementById('password').value = '';
-            }
-        }
-    </script>
 </body>
 </html>

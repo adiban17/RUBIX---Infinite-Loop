@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ProctorHQ | Admin Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; overflow: hidden;
+        }
+        .logo-container {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; color: white;
+            margin: 0 auto 24px;
+            box-shadow: 0 0 50px var(--primary-glow);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .glow-effect {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: -1; pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-fixed-layer"></div>
+    <div class="grid-overlay"></div>
+    <div class="glow-effect"></div>
+
+    <div class="login-card">
+        <div class="logo-container">🛡️</div>
+        
+        <h1 style="font-size: 1.8rem; margin-bottom: 6px;">Admin Access</h1>
+        <p class="subtitle" style="margin-bottom: 35px;">Enter credentials to view dashboard</p>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <label class="input-label">Admin ID</label>
+                <input type="text" id="adminId" class="input-field" placeholder="Enter Admin ID" autocomplete="off" required>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">Password</label>
+                <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 10px;">Authenticate</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s;">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('adminId').value;
+            const pass = document.getElementById('password').value;
+
+            if (id === "admin" && pass === "password123") {
+                localStorage.setItem("proctor_auth_token", "valid_session_key");
+                const btn = document.querySelector('.btn-primary');
+                btn.innerHTML = 'Verifying...';
+                btn.style.background = '#10b981';
+                setTimeout(() => { window.location.href = "/admin.html"; }, 500);
+            } else {
+                alert("⛔ Access Denied: Invalid Credentials");
+                document.getElementById('password').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
