@@ -9,16 +9,16 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Store student data
+// DATABASE (In-Memory)
+// Structure: { socketId: { name, roll, logs: [], ... } }
 let activeStudents = {};
 
 io.on('connection', (socket) => {
-    // 1. Send current data to any new admin
+    // 1. Send current data to new admins
     socket.emit('update-dashboard', Object.values(activeStudents));
 
-    // 2. Handle connection from Python Script (Student)
+    // 2. Student Connects
     socket.on('student-connect', (data) => {
-        console.log(`Student Connected: ${data.name}`);
         activeStudents[socket.id] = {
             id: socket.id,
             name: data.name,
@@ -26,16 +26,27 @@ io.on('connection', (socket) => {
             sap: data.sap,
             startTime: new Date().toLocaleTimeString(),
             endTime: '-',
-            riskScore: 'Normal' // Default status
+            riskScore: 'Normal',
+            logs: [] // <-- NEW: Array to store violation history
         };
         io.emit('update-dashboard', Object.values(activeStudents));
     });
 
-    // 3. Handle Status Updates from Python (e.g., "Looking Away")
+    // 3. Status Update (The Logging Engine)
     socket.on('student-status-update', (statusText) => {
         if (activeStudents[socket.id]) {
-            // Only update if status changed to avoid flickering
-            activeStudents[socket.id].riskScore = statusText;
+            const student = activeStudents[socket.id];
+            student.riskScore = statusText;
+
+            // Log if it's a violation
+            if (statusText.includes("VIOLATION")) {
+                const logEntry = {
+                    time: new Date().toLocaleTimeString(),
+                    violation: statusText
+                };
+                student.logs.push(logEntry);
+            }
+
             io.emit('update-dashboard', Object.values(activeStudents));
         }
     });
@@ -46,7 +57,6 @@ io.on('connection', (socket) => {
             activeStudents[socket.id].endTime = new Date().toLocaleTimeString();
             activeStudents[socket.id].riskScore = 'Offline';
             io.emit('update-dashboard', Object.values(activeStudents));
-            // Optional: delete activeStudents[socket.id];
         }
     });
 });

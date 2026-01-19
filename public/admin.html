@@ -5,6 +5,73 @@
     <title>ProctorHQ | Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- MODAL STYLES (The Popup) --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 15px;
+        }
+
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .log-item {
+            font-size: 0.9rem;
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .log-item:last-child { border-bottom: none; }
+        .log-time { color: #64748b; font-family: monospace; }
+        .log-msg { color: #991b1b; font-weight: 500; }
+
+        .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; }
+        .btn-download {
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+        }
+        .btn-download:hover { background-color: #1e293b; }
+
+        /* Make the name clickable */
+        .student-name { color: #4f46e5; font-weight: 600; cursor: pointer; text-decoration: underline; }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -37,55 +104,120 @@
         </div>
     </div>
 
+    <div id="logModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="modalTitle">Student Logs</h2>
+                <button class="btn-close" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <div id="logList" class="log-container">
+                </div>
+
+            <button class="btn-download" onclick="downloadLogs()">Download Report (.txt)</button>
+        </div>
+    </div>
+
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     
     <script>
         const socket = io();
         const tableBody = document.getElementById('student-table');
-        const connectionStatus = document.getElementById('connection-status');
-
-        socket.on('connect', () => {
-            connectionStatus.innerText = "System Online";
-            connectionStatus.style.color = "#166534";
-        });
+        
+        // Store student data globally so modal can access it
+        let currentStudents = []; 
+        let selectedStudent = null;
 
         socket.on('update-dashboard', (students) => {
+            currentStudents = students; // Update local cache
+            renderTable();
+        });
+
+        function renderTable() {
             tableBody.innerHTML = ''; 
             
-            if (students.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px; color: #94a3b8;">Waiting for candidates to join...</td></tr>';
+            if (currentStudents.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px; color: #94a3b8;">Waiting for candidates...</td></tr>';
                 return;
             }
 
-            students.forEach(student => {
-                // Determine Badge Style
+            currentStudents.forEach((student, index) => {
                 let badgeClass = "badge-normal";
-                let statusText = student.riskScore || "Normal";
-
-                if (student.riskScore && student.riskScore.includes("VIOLATION")) {
-                    badgeClass = "badge-violation";
-                } else if (student.riskScore === "Offline") {
-                    badgeClass = "badge-neutral"; // You can add a gray style for this if you want
-                    statusText = "Disconnected";
-                }
-
+                if (student.riskScore && student.riskScore.includes("VIOLATION")) badgeClass = "badge-violation";
+                
                 const row = `
                 <tr>
-                    <td style="font-weight: 500; color: #0f172a;">${student.name}</td>
+                    <td><span class="student-name" onclick="openModal(${index})">${student.name}</span></td>
                     <td style="font-family: monospace;">${student.roll}</td>
                     <td style="font-family: monospace;">${student.sap}</td>
                     <td>${student.startTime}</td>
                     <td>${student.endTime}</td>
-                    <td>
-                        <span class="badge ${badgeClass}">
-                            ${statusText}
-                        </span>
-                    </td>
+                    <td><span class="badge ${badgeClass}">${student.riskScore || "Normal"}</span></td>
                 </tr>`;
-                
                 tableBody.innerHTML += row;
             });
-        });
+        }
+
+        // --- MODAL FUNCTIONS ---
+        function openModal(index) {
+            selectedStudent = currentStudents[index];
+            document.getElementById('modalTitle').innerText = `Logs: ${selectedStudent.name}`;
+            
+            const list = document.getElementById('logList');
+            list.innerHTML = '';
+
+            if(selectedStudent.logs.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px;">No violations recorded.</p>';
+            } else {
+                selectedStudent.logs.forEach(log => {
+                    list.innerHTML += `
+                        <div class="log-item">
+                            <span class="log-msg">${log.violation}</span>
+                            <span class="log-time">${log.time}</span>
+                        </div>`;
+                });
+            }
+
+            document.getElementById('logModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('logModal').style.display = 'none';
+        }
+
+        function downloadLogs() {
+            if(!selectedStudent) return;
+
+            let content = `Exam Report for ${selectedStudent.name}\n`;
+            content += `Roll: ${selectedStudent.roll} | SAP: ${selectedStudent.sap}\n`;
+            content += `Date: ${new Date().toLocaleDateString()}\n`;
+            content += `----------------------------------------\n\n`;
+
+            if(selectedStudent.logs.length === 0) {
+                content += "No Violations Detected. Clean Record.";
+            } else {
+                selectedStudent.logs.forEach(log => {
+                    content += `[${log.time}] ${log.violation}\n`;
+                });
+            }
+
+            // Create invisible download link
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${selectedStudent.name}_Report.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Close modal if clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('logModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
     </script>
 </body>
 </html>
