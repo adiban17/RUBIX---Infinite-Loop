@@ -2,174 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProctorHQ | Welcome</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>ProctorHQ | Entrance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Specific Styles for the Landing Page */
-        body {
-            background-color: #f8fafc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .landing-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            max-width: 1000px;
-            width: 100%;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-
-        /* LEFT SIDE: Visual/Branding */
-        .brand-section {
-            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-            padding: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
+        .hero { text-align: center; max-width: 600px; margin: 80px auto; }
+        .hero h1 { font-size: 3.5rem; margin-bottom: 20px; line-height: 1.1; }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 40px; }
         
-        /* decorative circles */
-        .circle {
-            position: absolute;
-            background: white;
-            opacity: 0.1;
-            border-radius: 50%;
-        }
-        .c1 { width: 300px; height: 300px; top: -100px; left: -100px; }
-        .c2 { width: 200px; height: 200px; bottom: -50px; right: -50px; }
-
-        .brand-section h1 {
-            font-size: 3rem;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .brand-section p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            line-height: 1.6;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* RIGHT SIDE: Actions */
-        .login-section {
-            padding: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .login-section h2 {
-            font-size: 1.8rem;
-            color: #1e293b;
-            margin-bottom: 10px;
-        }
-
-        .login-section .subtitle {
-            color: #64748b;
-            margin-bottom: 40px;
-        }
-
-        .role-cards {
-            display: grid;
-            gap: 20px;
-        }
-
+        .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto; }
         .role-card {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            color: #1e293b;
+            background: white; padding: 40px; border-radius: 24px;
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+            text-align: center; text-decoration: none; color: var(--text-main);
+            transition: all 0.2s;
         }
-
-        .role-card:hover {
-            border-color: #6366f1;
-            background-color: #f5f3ff;
-            transform: translateY(-2px);
-        }
-
-        .icon-box {
-            width: 50px;
-            height: 50px;
-            background-color: #e0e7ff;
-            color: #4338ca;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-right: 20px;
-        }
-
-        .card-text h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .card-text p {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin: 0;
-        }
-
+        .role-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .role-icon { font-size: 3rem; margin-bottom: 20px; display: inline-block; }
+        .role-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+        .role-desc { font-size: 0.9rem; color: var(--text-muted); }
     </style>
 </head>
 <body>
-
-    <div class="landing-container">
-        <div class="brand-section">
-            <div class="circle c1"></div>
-            <div class="circle c2"></div>
-            <h1>Secure.<br>Smart.<br>Reliable.</h1>
-            <p>The next generation of AI-powered exam proctoring. Ensure integrity with real-time monitoring and advanced computer vision.</p>
+    <div class="container">
+        <div class="hero">
+            <h1>Integrity,<br>Automated.</h1>
+            <p>The next-generation proctoring suite powered by Computer Vision and Real-time Behavior Analysis.</p>
         </div>
 
-        <div class="login-section">
-            <h2>Welcome Back</h2>
-            <p class="subtitle">Select your role to continue to the portal.</p>
-
-            <div class="role-cards">
-                <a href="/admin.html" class="role-card">
-                    <div class="icon-box">⚡</div>
-                    <div class="card-text">
-                        <h3>Proctor Admin</h3>
-                        <p>Monitor live exams and view reports</p>
-                    </div>
-                </a>
-
-                <a href="/student.html" class="role-card">
-                    <div class="icon-box">🎓</div>
-                    <div class="card-text">
-                        <h3>Student Candidate</h3>
-                        <p>Launch the secure exam environment</p>
-                    </div>
-                </a>
-            </div>
+        <div class="role-grid">
+            <a href="/admin.html" class="role-card">
+                <span class="role-icon">⚡</span>
+                <div class="role-title">Admin Console</div>
+                <div class="role-desc">Monitor live exams, view violations, and generate evidence reports.</div>
+            </a>
+            
+            <a href="/student.html" class="role-card">
+                <span class="role-icon">🎓</span>
+                <div class="role-title">Student Portal</div>
+                <div class="role-desc">Launch the secure exam environment (Browser or App integration).</div>
+            </a>
         </div>
     </div>
-
 </body>
 </html>
