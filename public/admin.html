@@ -51,12 +51,12 @@
         }
 
         .container {
-            max-width: 1400px; /* Increased width for sidebar layout */
+            max-width: 1400px;
             margin: 0 auto;
             padding: 40px 20px;
         }
 
-        /* --- NEW DASHBOARD LAYOUT --- */
+        /* --- DASHBOARD LAYOUT --- */
         .dashboard-layout {
             display: grid;
             grid-template-columns: 280px 1fr; /* Sidebar | Content */
@@ -98,9 +98,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        .detail-row {
-            margin-bottom: 15px;
-        }
+        .detail-row { margin-bottom: 15px; }
         .detail-label {
             font-size: 0.75rem;
             color: var(--text-muted);
@@ -116,7 +114,7 @@
             word-break: break-all;
         }
 
-        /* --- Header in Main Content --- */
+        /* --- Header --- */
         header {
             display: flex;
             justify-content: space-between;
@@ -238,10 +236,22 @@
         }
         .btn-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
 
-        /* Responsive Layout */
+        /* --- NEW: ACTION BUTTON STYLES --- */
+        .btn-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px; border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05); color: var(--text-muted);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-icon:hover { transform: scale(1.1); color: white; }
+        .btn-icon.warn:hover { background: rgba(245, 158, 11, 0.2); color: var(--warning); border-color: var(--warning); }
+        .btn-icon.danger:hover { background: rgba(244, 63, 94, 0.2); color: var(--danger); border-color: var(--danger); }
+
+        /* Responsive */
         @media (max-width: 900px) {
             .dashboard-layout { grid-template-columns: 1fr; }
-            .sidebar { display: none; } /* Hidden on mobile for simplicity */
+            .sidebar { display: none; }
         }
     </style>
 </head>
@@ -261,8 +271,7 @@
                     <div class="badge badge-success">Verified Proctor</div>
                 </div>
                 
-                <div id="admin-details-container">
-                    </div>
+                <div id="admin-details-container"></div>
 
                 <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--glass-border);">
                     <button onclick="logout()" class="btn-secondary" style="color: #fda4af; border-color: rgba(244, 63, 94, 0.3);">
@@ -332,12 +341,12 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th width="30%">Candidate</th>
+                                    <th width="25%">Candidate</th>
                                     <th width="15%">Roll No</th>
                                     <th width="15%">SAP ID</th>
-                                    <th width="15%">Max Risk</th>
-                                    <th width="25%">Live Status</th> 
-                                </tr>
+                                    <th width="10%">Max Risk</th>
+                                    <th width="15%">Status</th>
+                                    <th width="20%">Actions</th> </tr>
                             </thead>
                             <tbody id="student-table">
                                 </tbody>
@@ -350,7 +359,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // --- 1. POPULATE ADMIN SIDEBAR ---
+        // --- 1. ADMIN SIDEBAR ---
         const adminData = {
             name: "Dr. A. Banerjee",
             dob: "15 Aug 1980",
@@ -359,12 +368,10 @@
         };
 
         function renderAdminProfile() {
-            // Set Header
             document.getElementById('admin-name-header').innerText = adminData.name;
             const initials = adminData.name.split(" ").map(n => n[0]).join("").substring(0, 2);
             document.getElementById('admin-initials').innerText = initials;
 
-            // Render Details Loop
             const container = document.getElementById('admin-details-container');
             const fields = [
                 { label: "Full Name", val: adminData.name },
@@ -381,12 +388,9 @@
                 </div>`;
             });
         }
-        
-        // Initialize Sidebar
         renderAdminProfile();
 
-
-        // --- 2. EXISTING SOCKET LOGIC ---
+        // --- 2. SOCKET LOGIC ---
         const socket = io();
         let currentStudents = [];
         
@@ -410,19 +414,18 @@
             tbody.innerHTML = '';
             
             if (currentStudents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 60px; color: var(--text-muted);"><ion-icon name="search-outline" style="font-size: 2rem; margin-bottom: 10px; display: block; margin: 0 auto 10px auto; opacity: 0.5;"></ion-icon>Waiting for candidates to join...</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 60px; color: var(--text-muted);"><ion-icon name="search-outline" style="font-size: 2rem; margin-bottom: 10px; display: block; margin: 0 auto 10px auto; opacity: 0.5;"></ion-icon>Waiting for candidates to join...</td></tr>';
                 return;
             }
 
             currentStudents.forEach((student, index) => {
                 const initials = student.name ? student.name.substring(0,2).toUpperCase() : "--";
+                const isOnline = student.endTime === '-';
                 
+                // Status Logic
                 let badgeClass = "badge-success";
                 let statusText = "Live & Safe";
                 
-                const isOnline = student.endTime === '-';
-
-                // Live Status Logic
                 if (student.status && student.status.includes("VIOLATION")) {
                     badgeClass = "badge-danger";
                     statusText = student.status.replace("VIOLATION:", "").trim(); 
@@ -431,22 +434,34 @@
                     statusText = "Completed"; 
                 }
 
-                // Risk Logic (Using Peak Risk for visual)
+                // Risk Logic
                 const maxScore = student.peakRisk || 0;
-                let riskColor = "#34d399"; 
+                let riskColor = "#34d399"; // Green
                 let riskGlow = "";
                 
-                if(maxScore >= 40) riskColor = "#facc15"; 
+                if(maxScore >= 40) riskColor = "#facc15"; // Yellow
                 if(maxScore >= 75) {
-                    riskColor = "#f43f5e"; 
+                    riskColor = "#f43f5e"; // Red
                     riskGlow = "text-shadow: 0 0 10px rgba(244, 63, 94, 0.5);";
                 }
 
                 const onlineIndicator = isOnline ? `<div class="dot pulse" style="background: ${riskColor}"></div>` : '';
 
+                // NEW: Actions Buttons
+                const actionsHtml = isOnline ? `
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="triggerAction('${student.id}', 'warn')" class="btn-icon warn" title="Send Warning">
+                            <ion-icon name="warning-outline"></ion-icon>
+                        </button>
+                        <button onclick="triggerAction('${student.id}', 'terminate')" class="btn-icon danger" title="Terminate Exam">
+                            <ion-icon name="power-outline"></ion-icon>
+                        </button>
+                    </div>
+                ` : `<span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">Ended</span>`;
+
                 const row = `
-                <tr style="cursor: pointer;" onclick="viewCandidate(${index})">
-                    <td>
+                <tr style="cursor: pointer;">
+                    <td onclick="viewCandidate(${index})">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <div class="avatar">${initials}</div>
                             <div>
@@ -470,15 +485,30 @@
                             <span style="margin-left: 4px;">${statusText}</span>
                         </div>
                     </td>
+
+                    <td onclick="event.stopPropagation()">${actionsHtml}</td>
                 </tr>`;
                 tbody.innerHTML += row;
             });
         }
 
+        // --- 3. ACTIONS & NAV ---
         function viewCandidate(index) {
             const student = currentStudents[index];
             localStorage.setItem('view_candidate_data', JSON.stringify(student));
             window.location.href = '/candidate.html';
+        }
+
+        function triggerAction(socketId, actionType) {
+            const actionVerb = actionType === 'warn' ? 'WARN' : 'TERMINATE';
+            if(!confirm(`⚠️ CONFIRMATION REQUIRED\n\nAre you sure you want to ${actionVerb} this candidate?`)) return;
+            
+            socket.emit('admin-action', {
+                targetId: socketId,
+                action: actionType
+            });
+            // Visual feedback handled by socket update or alert
+            if(actionType === 'warn') alert("Warning sent to candidate screen.");
         }
 
         function logout() {

@@ -6,6 +6,112 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Fira+Code&display=swap" rel="stylesheet">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* --- 1. HERO TEXT EFFECT --- */
+        @keyframes shine {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(300deg, #38bdf8, #818cf8, #c084fc, #f472b6, #38bdf8);
+            background-size: 300% 300%;
+            animation: shine 4s ease-in-out infinite;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            filter: drop-shadow(0 0 20px rgba(129, 140, 248, 0.4));
+        }
+
+        /* --- 2. TRI-SHIELD SECTION --- */
+        .usp-section {
+            margin-bottom: 100px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .usp-grid {
+            display: grid;
+            /* INCREASED DISTANCE BETWEEN LAYERS HERE */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 60px; 
+            margin-top: 50px;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Connecting Line */
+        @media (min-width: 900px) {
+            .usp-grid::before {
+                content: '';
+                position: absolute;
+                top: 55px;
+                left: 10%;
+                right: 10%;
+                height: 2px;
+                background: linear-gradient(90deg, 
+                    rgba(56, 189, 248, 0) 0%, 
+                    rgba(56, 189, 248, 0.5) 20%, 
+                    rgba(244, 63, 94, 0.5) 80%, 
+                    rgba(244, 63, 94, 0) 100%
+                );
+                z-index: 0;
+            }
+        }
+
+        .usp-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px 25px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+        }
+
+        /* --- COOL HOVER EFFECTS --- */
+        .usp-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        /* Specific Glows per Layer */
+        .usp-card.layer-1:hover { box-shadow: 0 20px 40px -10px rgba(56, 189, 248, 0.3); }
+        .usp-card.layer-2:hover { box-shadow: 0 20px 40px -10px rgba(250, 204, 21, 0.3); }
+        .usp-card.layer-3:hover { box-shadow: 0 20px 40px -10px rgba(244, 63, 94, 0.3); }
+
+        .usp-icon-wrapper {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            display: inline-block;
+        }
+
+        .usp-card:hover .usp-icon-wrapper {
+            transform: scale(1.2) rotate(5deg);
+            filter: drop-shadow(0 0 15px currentColor);
+        }
+
+        .step-badge {
+            display: inline-block;
+            background: var(--bg-dark, #0f172a);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted, #94a3b8);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+    </style>
 </head>
 <body>
     <div class="bg-fixed-layer"></div>
@@ -27,7 +133,7 @@
 
     <div class="container">
         
-        <div class="hero-section">
+        <div class="hero-section" style="margin-bottom: 80px;">
             <div class="badge-pill">
                 <span class="dot"></span> v1.0 Stable Release
             </div>
@@ -45,6 +151,46 @@
                     <ion-icon name="shield-checkmark-outline" style="margin-right: 8px;"></ion-icon>
                     Student Login
                 </a>
+            </div>
+        </div>
+
+        <div class="usp-section">
+            <h2 style="font-size: 1.8rem; margin-bottom: 10px; font-weight: 700;">The Tri-Shield Protocol</h2>
+            <p style="color: var(--text-muted); font-size: 1rem;">Our proprietary multi-stage verification engine</p>
+            
+            <div class="usp-grid">
+                <div class="usp-card layer-1">
+                    <div class="step-badge" style="border-color: #38bdf8; color: #38bdf8;">Layer 01</div>
+                    <div class="usp-icon-wrapper" style="color: #38bdf8;">
+                        <ion-icon name="hardware-chip-outline"></ion-icon>
+                    </div>
+                    <h3 style="font-size: 1.2rem; margin-bottom: 15px; color: white;">AI Core Detection</h3>
+                    <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+                        YOLOv8 & MediaPipe run simultaneously to flag phones, multiple faces, and gaze deviations in real-time.
+                    </p>
+                </div>
+
+                <div class="usp-card layer-2">
+                    <div class="step-badge" style="border-color: #facc15; color: #facc15;">Layer 02</div>
+                    <div class="usp-icon-wrapper" style="color: #facc15;">
+                        <ion-icon name="hourglass-outline"></ion-icon>
+                    </div>
+                    <h3 style="font-size: 1.2rem; margin-bottom: 15px; color: white;">Smart Buffer Logic</h3>
+                    <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+                        A temporal verification buffer filters out micro-movements, ensuring only sustained violations are flagged.
+                    </p>
+                </div>
+
+                <div class="usp-card layer-3">
+                    <div class="step-badge" style="border-color: #f43f5e; color: #f43f5e;">Layer 03</div>
+                    <div class="usp-icon-wrapper" style="color: #f43f5e;">
+                        <ion-icon name="camera-outline"></ion-icon>
+                    </div>
+                    <h3 style="font-size: 1.2rem; margin-bottom: 15px; color: white;">Evidence Lock</h3>
+                    <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+                        Confirmed breaches trigger an instant high-res capture, creating an undeniable forensic audit trail.
+                    </p>
+                </div>
             </div>
         </div>
 

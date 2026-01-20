@@ -78,6 +78,21 @@ io.on('connection', (socket) => {
             logs: [] 
         };
         io.emit('update-dashboard', Object.values(activeStudents));
+        
+    });
+
+    // --- NEW: REMOTE ADMIN ACTIONS ---
+    socket.on('admin-action', (payload) => {
+        // payload = { targetId: 'socket_id', action: 'warn' | 'terminate' }
+        const { targetId, action } = payload;
+        
+        console.log(`[ADMIN ACTION] ${action.toUpperCase()} sent to ${targetId}`);
+
+        // Forward command specifically to the targeted student
+        io.to(targetId).emit('admin-command', {
+            type: action,
+            timestamp: new Date().toLocaleTimeString()
+        });
     });
 
     // --- STATUS UPDATE FROM PYTHON APP ---

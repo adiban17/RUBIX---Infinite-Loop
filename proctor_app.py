@@ -317,12 +317,46 @@ class ProctorApp:
             messagebox.showwarning("Compliance", "You must accept the Terms & Conditions.")
             return
         USER_DETAILS.update({"name": self.name_entry.get(), "roll": self.roll_entry.get(), "sap": self.sap_entry.get()})
+        
         try:
             self.sio.connect('http://localhost:3000')
             self.sio.emit('student-connect', USER_DETAILS)
+            
+            # --- NEW: LISTEN FOR ADMIN COMMANDS ---
+            self.sio.on('admin-command', self.handle_admin_command)
+            
             self.start_exam_mode()
         except Exception as e:
             messagebox.showerror("Connection Error", f"Server unreachable.\n\nError: {e}")
+
+    # --- NEW: ADMIN COMMAND HANDLER ---
+    def handle_admin_command(self, data):
+        command_type = data.get('type')
+        print(f"System: Received Admin Command: {command_type}")
+        
+        if command_type == 'warn':
+            # Use root.after to safely interact with GUI from socket thread
+            self.root.after(0, lambda: messagebox.showwarning(
+                "⚠️ PROCTOR WARNING ⚠️", 
+                "The invigilator has flagged suspicious behavior.\n\nPlease focus strictly on your exam screen to avoid termination."
+            ))
+            
+        elif command_type == 'terminate':
+            # Use root.after to trigger the termination sequence
+            self.root.after(0, self.force_terminate_session)
+
+    def force_terminate_session(self):
+        messagebox.showerror(
+            "⛔ EXAM TERMINATED ⛔", 
+            "Your session has been forcibly ended by the Proctor due to repeated violations.\n\nThe application will now close."
+        )
+        self.stop_threads = True 
+        self.is_exam_running = False
+        if self.cap: self.cap.release()
+        try: self.sio.disconnect()
+        except: pass
+        self.root.destroy()
+        os._exit(0)
 
     # --- 2. EXAM MODE UI ---
     def start_exam_mode(self):
